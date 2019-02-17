@@ -1,0 +1,39 @@
+task sourceJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier "javadoc"
+    from javadoc
+}
+
+publishing {
+    publications {
+        modelJava(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            // Edit pom to mark "provided" as dependencies
+            pom.withXml { xml ->
+                def repositoriesNode = xml.asNode().appendNode('repositories')
+                project.repositories.each {
+                    if (!(it.name.toLowerCase().startsWith('maven'))) {
+                        def repositoryNode = repositoriesNode.appendNode('repository')
+                        repositoryNode.appendNode('id', it.name)
+                        repositoryNode.appendNode('name', it.name)
+                        repositoryNode.appendNode('url', it.url)
+                    }
+                }
+            }
+        }
+    }
+}
+
+javadoc {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}

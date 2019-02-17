@@ -1,0 +1,107 @@
+plugins {
+    id 'java-library'
+    id "maven-publish"
+    id "org.openmicroscopy.dsl" version "5.5.0-SNAPSHOT"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name 'ome.maven'
+        url 'https://artifacts.openmicroscopy.org/artifactory/maven/'
+    }
+    maven {
+        name 'unidata'
+        url "https://artifacts.unidata.ucar.edu/repository/unidata-all/"
+    }
+}
+
+group = 'org.openmicroscopy'
+version = '5.5.0-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.testng', name: 'testng', version: '6.14.2'
+
+    // Needs updating to later versions
+    api 'org.springframework:spring-orm:4.3.14.RELEASE'
+    api 'org.springframework:spring-context:4.3.14.RELEASE'
+    api 'org.springframework:spring-context-support:4.3.22.RELEASE'
+    api 'org.hibernate:hibernate-core:3.6.10.Final'
+    api 'org.hibernate:hibernate-search:3.4.2.Final'
+
+    // Our libraries
+    api 'org.openmicroscopy:ome-xml:5.6.3'
+    api ('ome:formats-bsd:5.9.2') {
+        exclude group: 'org.perf4j', module: 'perf4j'
+    }
+    api 'ome:formats-gpl:5.9.2'
+
+    // Necessary since formats-bsd has version 0.9.13. This should be removed
+    // when fixed in B-F
+    api 'org.perf4j:perf4j:0.9.16'
+
+    // Unidata
+    api 'edu.ucar:bufr:3.0'
+    api 'edu.ucar:udunits:4.5.5'
+    api 'edu.ucar:netcdf:4.3.22'
+}
+
+test {
+    // enable TestNG support (default is JUnit)
+    useTestNG() {
+        suites "src/test/resources/unit.testng.xml"
+    }
+}
+
+dsl {
+    databaseType "psql"
+
+    code {
+        java {
+            template "object.vm"
+            outputDir "java"
+            formatOutput { st ->
+                "${st.getPackage()}/${st.getShortname()}.java"
+            }
+        }
+    }
+
+    resource {
+        hibernate {
+            template "cfg.vm"
+            outputFile "resources/hibernate.cfg.xml"
+        }
+
+        sql {
+            template "views.vm"
+            outputFile "resources/views.sql"
+        }
+
+        enums {
+            template "enums.vm"
+            outputFile "resources/enums.properties"
+        }
+    }
+}
+
+clean {
+    delete "src/generated"
+}
+
+jar {
+    manifest {
+        attributes(
+                'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+                'Created-By': "Gradle ${gradle.gradleVersion}",
+                'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                'Main-Class': 'ome.util.tasks.Run',
+                "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+        )
+    }
+}
+// Add publish functionality
+apply from: 'publish.gradle'

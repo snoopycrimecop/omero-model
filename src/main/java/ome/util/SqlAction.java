@@ -35,20 +35,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcOperations;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 /**
  * Single wrapper for all JDBC activities.
- *
+ * <p>
  * This interface is meant to replace <em>all</em> uses of both
- * {@link SimpleJdbcTemplate} and
+ * {@link JdbcTemplate} and
  * {@link org.hibernate.Session#createSQLQuery(String)} for the entire OMERO
  * code base.
  *
@@ -226,14 +226,14 @@ public interface SqlAction {
         }
         public SqlParameterSource args() {
             MapSqlParameterSource source = new MapSqlParameterSource();
-            source.addValue("eid", eventId, java.sql.Types.BIGINT);
-            source.addValue("eid", eventId, java.sql.Types.BIGINT);
-            source.addValue("fid", fileId, java.sql.Types.BIGINT);
-            source.addValue("oid", ownerId, java.sql.Types.BIGINT);
-            source.addValue("gid", groupId, java.sql.Types.BIGINT);
-            source.addValue("p", path, java.sql.Types.VARCHAR);
-            source.addValue("n", name, java.sql.Types.VARCHAR);
-            source.addValue("r", repo, java.sql.Types.VARCHAR);
+            source.addValue("eid", eventId, Types.BIGINT);
+            source.addValue("eid", eventId, Types.BIGINT);
+            source.addValue("fid", fileId, Types.BIGINT);
+            source.addValue("oid", ownerId, Types.BIGINT);
+            source.addValue("gid", groupId, Types.BIGINT);
+            source.addValue("p", path, Types.VARCHAR);
+            source.addValue("n", name, Types.VARCHAR);
+            source.addValue("r", repo, Types.VARCHAR);
             return source;
         }
         public String toString() {
@@ -605,13 +605,15 @@ public interface SqlAction {
     /**
      * Base implementation which can be used
      */
-    public static abstract class Impl implements SqlAction {
+    abstract class Impl implements SqlAction {
 
         protected final static int MAX_IN_SIZE = 1000;
 
         protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-        protected abstract SimpleJdbcOperations _jdbc();
+        protected abstract JdbcTemplate _jdbc();
+
+        protected abstract NamedParameterJdbcTemplate _namedJdbc();
 
         protected abstract String _lookup(String key);
 
@@ -624,10 +626,10 @@ public interface SqlAction {
         }
 
         public void createInsertTrigger(String name, String table, String procedure) {
-            _jdbc().update(String.format("DROP TRIGGER IF EXISTS %s ON %s",
+            _jdbc().execute(String.format("DROP TRIGGER IF EXISTS %s ON %s",
                     name, table));
-            _jdbc().update(String.format("CREATE TRIGGER %s AFTER INSERT ON " +
-                    "%s FOR EACH ROW EXECUTE PROCEDURE %s",
+            _jdbc().execute(String.format("CREATE TRIGGER %s AFTER INSERT ON " +
+                            "%s FOR EACH ROW EXECUTE PROCEDURE %s",
                     name, table, procedure));
         }
 
@@ -645,7 +647,7 @@ public interface SqlAction {
                     if (query.contains("(:ids)")) {
                         @SuppressWarnings("unchecked")
                         String temp = createIdsTempTable(l);
-                        String repl = "temp_ids_cursor('"+temp+"')";
+                        String repl = "temp_ids_cursor('" + temp + "')";
                         query = query.replace("(:ids)", "(" + repl + ")");
                     }
                 }
@@ -656,7 +658,7 @@ public interface SqlAction {
 
         public String createIdsTempTable(Collection<Long> ids) {
             String name = UUID.randomUUID().toString().replaceAll("-", "");
-            List<Object[]> batch = new ArrayList<Object[]>();
+            List<Object[]> batch = new ArrayList<>();
             for (Long id : ids) {
                 batch.add(new Object[]{name, id});
             }
@@ -678,20 +680,16 @@ public interface SqlAction {
                     _lookup("update_node"), uuid); //$NON-NLS-1$
         }
 
-
         public boolean setUserPassword(Long experimenterID, String password) {
-            int results = _jdbc().update(_lookup("update_password"), //$NON-NLS-1$
-                    password, experimenterID);
+            int results = _jdbc().update(_lookup("update_password"), password, experimenterID);
             if (results < 1) {
-                results = _jdbc().update(_lookup("insert_password"), //$NON-NLS-1$
-                        experimenterID, password);
+                results = _jdbc().update(_lookup("insert_password"), experimenterID, password);
             }
             return results >= 1;
         }
 
         public int changeGroupPermissions(Long id, Long internal) {
-            return _jdbc().update(_lookup("update_permissions_for_group"),
-                    internal, id);
+            return _jdbc().update(_lookup("update_permissions_for_group"), internal, id);
         }
 
         public int changeTablePermissionsForGroup(String table, Long id, Long internal) {
@@ -722,11 +720,10 @@ public interface SqlAction {
         @Override
         public Collection<Long> findOldAdminPrivileges() {
             final List<Long> transactionIds = new ArrayList<>();
-            for (final Map<String, Object> resultRow :_jdbc().queryForList(_lookup("old_privileges_select"))) {
-                for (final Object transactionId : resultRow.values()) {
-                    transactionIds.add((Long) transactionId);
-                }
-            }
+            _jdbc().query(
+                    _lookup("old_privileges_select"),
+                    (RowMapper<Object>) (rs, rowNum) -> transactionIds.add(rs.getLong(1))
+            );
             return transactionIds;
         }
 
@@ -737,9 +734,9 @@ public interface SqlAction {
             }
             final List<Object[]> transactionIdArrays = new ArrayList<>(transactionIds.size());
             for (final Long transactionId : transactionIds) {
-                transactionIdArrays.add(new Long[] {transactionId});
+                transactionIdArrays.add(new Long[]{transactionId});
             }
-            _jdbc().batchUpdate(_lookup("old_privileges_delete"), transactionIdArrays, new int[] {Types.BIGINT});
+            _jdbc().batchUpdate(_lookup("old_privileges_delete"), transactionIdArrays);
         }
 
         @Override
@@ -751,9 +748,9 @@ public interface SqlAction {
         public void insertCurrentAdminPrivileges(Iterable<AdminPrivilege> privileges) {
             final List<Object[]> batchArguments = new ArrayList<>();
             for (final AdminPrivilege privilege : privileges) {
-                batchArguments.add(new String[] {privilege.getValue()});
+                batchArguments.add(new String[]{privilege.getValue()});
             }
-            _jdbc().batchUpdate(_lookup("curr_privileges_insert"), batchArguments, new int[] {Types.VARCHAR});
+            _jdbc().batchUpdate(_lookup("curr_privileges_insert"), batchArguments);
         }
 
         //
@@ -767,12 +764,12 @@ public interface SqlAction {
          * SQL type to use" will be raised.
          *
          * @param mimetypes If null, then "" will be returned.
-         * @param params sql parameter source to be passed to JDBC methods.
+         * @param params    sql parameter source to be passed to JDBC methods.
          * @return Possibly empty String, but never null.
          */
-        protected String addMimetypes(Collection<String> mimetypes, Map<String, Object> params) {
+        protected String addMimetypes(Collection<String> mimetypes, MapSqlParameterSource params) {
             if (mimetypes != null) {
-                params.put("mimetypes", mimetypes);
+                params.addValue("mimetypes", mimetypes);
                 return _lookup("and_mimetype"); //$NON-NLS-1$
             }
             return "";
@@ -783,15 +780,15 @@ public interface SqlAction {
         }
 
         public Long findRepoFile(String uuid, String dirname, String basename,
-                String mimetype) {
+                                 String mimetype) {
             return findRepoFile(uuid, dirname, basename,
                     mimetype == null ? null : Collections.singleton(mimetype));
         }
 
         public Long findRepoFile(String uuid, String dirname, String basename,
-                Set<String> mimetypes) {
+                                 Set<String> mimetypes) {
             Map<String, Long> rv = findRepoFiles(uuid, dirname,
-                    Arrays.asList(basename), mimetypes);
+                    Collections.singletonList(basename), mimetypes);
             if (rv == null) {
                 return null;
             } else {
@@ -800,33 +797,32 @@ public interface SqlAction {
         }
 
         public Map<String, Long> findRepoFiles(String uuid, String dirname,
-                List<String> basenames,
-                Set<String> mimetypes) {
+                                               List<String> basenames,
+                                               Set<String> mimetypes) {
 
             if (basenames == null || basenames.size() == 0) {
                 return null;
             }
 
             final List<List<String>> batches = Lists.partition(basenames, MAX_IN_SIZE);
-            final Map<String, Object> params = new HashMap<String, Object>();
+
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("repo", uuid)
+                    .addValue("path", dirname);
+
             String findRepoFileSql = _lookup("find_repo_files_by_name"); //$NON-NLS-1$
-            params.put("repo", uuid);
-            params.put("path", dirname);
             findRepoFileSql += addMimetypes(mimetypes, params);
             Map<String, Long> rv = null;
 
             for (List<String> batch : batches) {
-                params.put("names", batch);
+                params.addValue("names", batch);
                 try {
-                    final Map<String, Long> tmp = new HashMap<String, Long>();
-                    _jdbc().query(findRepoFileSql,
-                            new RowMapper<Object>(){
-                                @Override
-                                public Object mapRow(ResultSet arg0, int arg1)
-                                        throws SQLException {
-                                    tmp.put(arg0.getString(1),  arg0.getLong(2));
-                                    return null;
-                                }}, params);
+                    final Map<String, Long> tmp = new HashMap<>();
+                    _namedJdbc().query(
+                            findRepoFileSql,
+                            params,
+                            (rs, rowNum) -> tmp.put(rs.getString(1), rs.getLong(2))
+                    );
                     if (rv == null) {
                         rv = tmp;
                     } else {
@@ -843,35 +839,41 @@ public interface SqlAction {
         }
 
         public int repoScriptCount(String uuid, Set<String> mimetypes) {
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("repo", uuid);
+
             String query = _lookup("repo_script_count"); //$NON-NLS-1$
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("repo", uuid);
             query += addMimetypes(mimetypes, params);
-            return _jdbc().queryForInt(query, params);
+            return _namedJdbc().queryForObject(query, params, Integer.class);
         }
 
 
         public int isFileInRepo(String uuid, long id, Set<String> mimetypes) {
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("repo", uuid)
+                    .addValue("file", id);
+
             String query = _lookup("is_file_in_repo"); //$NON-NLS-1$
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("repo", uuid);
-            params.put("file", id);
             query += addMimetypes(mimetypes, params);
-            return _jdbc().queryForInt(query, params);
+            return _namedJdbc().queryForObject(query, params, Integer.class);
         }
 
         public List<Long> fileIdsInDb(String uuid, Set<String> mimetypes) {
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("repo", uuid);
+
             String query = _lookup("file_id_in_db"); //$NON-NLS-1$
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("repo", uuid);
             query += addMimetypes(mimetypes, params);
-            return _jdbc().query(query, new IdRowMapper(), params);
+            return _namedJdbc().query(query, params, new IdRowMapper());
         }
 
         public List<Long> filterFileIdsByRepo(String uuid, List<Long> fileIds) {
-            final Map<String, Object> arguments = ImmutableMap.of("repo", uuid, "ids", fileIds);
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("repo", uuid)
+                    .addValue("ids", fileIds);
+
             try {
-                return _jdbc().query(_lookup("find_files_in_repo"), new IdRowMapper(), arguments);
+                return _namedJdbc().query(_lookup("find_files_in_repo"), params, new IdRowMapper());
             } catch (EmptyResultDataAccessException e) {
                 return Collections.emptyList();
             }
@@ -892,23 +894,22 @@ public interface SqlAction {
 
         public List<DeleteLog> findRepoDeleteLogs(DeleteLog template) {
             try {
-                return _jdbc().query(_lookup("find_repo_delete_logs"),
-                        template, template.args());
+                return _namedJdbc().query(_lookup("find_repo_delete_logs"),
+                        template.args(), template);
             } catch (EmptyResultDataAccessException e) {
                 return Collections.emptyList();
             }
         }
 
         public int deleteRepoDeleteLogs(DeleteLog template) {
-            return _jdbc().update(_lookup("delete_repo_delete_logs"),
-                    template.args());
+            return _namedJdbc().update(_lookup("delete_repo_delete_logs"), template.args());
         }
 
         public String findRepoRootPath(String uuid) {
             try {
                 return _jdbc().queryForObject(_lookup("find_repo_root_path"), //$NON-NLS-1$
                         String.class, uuid);
-            } catch (EmptyResultDataAccessException erdae) {
+            } catch (EmptyResultDataAccessException e) {
                 return null;
             }
         }
@@ -917,72 +918,63 @@ public interface SqlAction {
             try {
                 return _jdbc().queryForObject(_lookup("find_repo_file_path"), //$NON-NLS-1$
                         String.class, id, uuid);
-            } catch (EmptyResultDataAccessException erdae) {
+            } catch (EmptyResultDataAccessException e) {
                 return null;
             }
         }
 
         public List<long[]> nextPixelsDataLogForRepo(String repo, long lastEventId, int rows) {
-            final RowMapper<long[]> rm = new RowMapper<long[]>() {
-                public long[] mapRow(ResultSet arg0, int arg1)
-                        throws SQLException {
-                    long[] rv = new long[4];
-                    rv[0] = arg0.getLong(1);
-                    rv[1] = arg0.getLong(2);
-                    rv[2] = arg0.getLong(3);
-                    rv[3] = arg0.getLong(4);
-                    return rv;
-                }};
+            final RowMapper<long[]> rm = (arg0, arg1) -> {
+                long[] rv = new long[4];
+                rv[0] = arg0.getLong(1);
+                rv[1] = arg0.getLong(2);
+                rv[2] = arg0.getLong(3);
+                rv[3] = arg0.getLong(4);
+                return rv;
+            };
+
             try {
                 if (repo == null) {
-                    return _jdbc().query(
-                            _lookup("find_next_pixels_data_per_user_for_null_repo"), // $NON-NLS-1$
+                    return _jdbc().query(_lookup("find_next_pixels_data_per_user_for_null_repo"),
                             rm, lastEventId, rows);
                 } else {
-                    return _jdbc().query(
-                            _lookup("find_next_pixels_data_per_user_for_repo"), // $NON-NLS-1$
+                    return _jdbc().query(_lookup("find_next_pixels_data_per_user_for_repo"),
                             rm, lastEventId, repo, rows);
                 }
-            } catch (EmptyResultDataAccessException erdae) {
+            } catch (EmptyResultDataAccessException e) {
                 return null;
             }
         }
 
         public long getGroupPermissions(long groupId) {
             return _jdbc().queryForObject(
-                    _lookup("get_group_permissions"), Long.class, //$NON-NLS-1$
-                    groupId);
+                    _lookup("get_group_permissions"), Long.class, groupId);
         }
 
         public Map<String, Long> getGroupIds(Collection<String> names) {
-            final Map<String, Long> rv = new HashMap<String, Long>();
+            final Map<String, Long> rv = new HashMap<>();
             if (names == null || names.size() == 0) {
                 return rv;
             }
 
-            final Map<String, Collection<String>> params =
-                    new HashMap<String, Collection<String>>();
-            params.put("names", names);
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("names", names);
 
-            RowMapper<Object> mapper = new RowMapper<Object>(){
-                @Override
-                public Object mapRow(ResultSet arg0, int arg1)
-                        throws SQLException {
-                    Long id = arg0.getLong(1);
-                    String name = arg0.getString(2);
-                    rv.put(name, id);
-                    return null;
-                }};
-            _jdbc().query(_lookup("get_group_ids"), //$NON-NLS-1$
-                    mapper, params);
+            RowMapper<Object> mapper = (arg0, arg1) -> {
+                Long id = arg0.getLong(1);
+                String name = arg0.getString(2);
+                rv.put(name, id);
+                return null;
+            };
+            _namedJdbc().query(_lookup("get_group_ids"),
+                    params, mapper);
             return rv;
         }
 
         public String getPasswordHash(Long experimenterID) {
             String stored;
             try {
-                stored = _jdbc().queryForObject(
-                        _lookup("password_hash"), //$NON-NLS-1$
+                stored = _jdbc().queryForObject(_lookup("password_hash"),
                         String.class, experimenterID);
             } catch (EmptyResultDataAccessException e) {
                 stored = null; // This means there's not one.
@@ -993,7 +985,7 @@ public interface SqlAction {
         public Long getUserId(String userName) {
             Long id;
             try {
-                id = _jdbc().queryForObject(_lookup("user_id"), //$NON-NLS-1$
+                id = _jdbc().queryForObject(_lookup("user_id"),
                         Long.class, userName);
             } catch (EmptyResultDataAccessException e) {
                 id = null; // This means there's not one.
@@ -1031,44 +1023,37 @@ public interface SqlAction {
         @Override
         public boolean isLdapExperimenter(Long id) {
             String query = _lookup("is_ldap_experimenter"); //$NON-NLS-1$
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("id", id);
-            return _jdbc().queryForObject(query, Boolean.class, params);
+
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("id", id);
+
+            return _namedJdbc().queryForObject(query, params, Boolean.class);
         }
 
         public List<String> getUserGroups(String userName) {
             List<String> roles;
             try {
                 roles = _jdbc().query(_lookup("user_groups"), //$NON-NLS-1$
-                        new RowMapper<String>() {
-                            public String mapRow(ResultSet rs, int rowNum)
-                                    throws SQLException {
-                                return rs.getString(1);
-                            }
-                        }, userName);
+                        (rs, rowNum) -> rs.getString(1), userName);
             } catch (EmptyResultDataAccessException e) {
                 roles = null; // This means there's not one.
             }
-            return roles == null ? new ArrayList<String>() : roles;
+            return roles == null ? new ArrayList<>() : roles;
         }
 
         public ExperimenterGroup groupInfoFor(String table, long id) {
             try {
                 return _jdbc().queryForObject(String.format(
-                   _lookup("get_group_info"), table), //$NON-NLS-1$
-                    new RowMapper<ExperimenterGroup>() {
-                        @Override
-                        public ExperimenterGroup mapRow(ResultSet arg0, int arg1)
-                            throws SQLException {
+                        _lookup("get_group_info"), table), //$NON-NLS-1$
+                        (arg0, arg1) -> {
                             ExperimenterGroup group = new ExperimenterGroup();
                             group.setId(arg0.getLong(1));
                             group.setName(arg0.getString(2));
                             Permissions p = Utils.toPermissions(arg0.getLong(3));
                             group.getDetails().setPermissions(p);
                             return group;
-                        }
-                    }, id);
-            } catch (EmptyResultDataAccessException erdae) {
+                        }, id);
+            } catch (EmptyResultDataAccessException e) {
                 return null;
             }
         }
@@ -1080,15 +1065,15 @@ public interface SqlAction {
         }
 
         public String scriptRepo(long fileId, Set<String> mimetypes) {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("file", fileId);
 
             String query = _lookup("file_repo_of_script"); //$NON-NLS-1$
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("file", fileId);
             query += addMimetypes(mimetypes, params);
 
             try {
-                return _jdbc().queryForObject(query, String.class, params);
-            } catch (EmptyResultDataAccessException erdae) {
+                return _namedJdbc().queryForObject(query, params, String.class);
+            } catch (EmptyResultDataAccessException e) {
                 return null;
             }
         }
@@ -1131,7 +1116,7 @@ public interface SqlAction {
 
         public int updateOrInsertConfigValue(String name, String value) {
             int count = _jdbc().update(_lookup("config_value_update"), // $NON-NLS-1$
-                   value, name);
+                    value, name);
             if (count == 0) {
                 count = _jdbc().update(_lookup("config_value_insert"), // $NON-NLS-1$
                         name, value);
@@ -1141,44 +1126,37 @@ public interface SqlAction {
 
         public long selectCurrentEventLog(String key) {
             String value = _jdbc().queryForObject(
-                _lookup("log_loader_query"), String.class, key); //$NON-NLS-1$
+                    _lookup("log_loader_query"), String.class, key); //$NON-NLS-1$
             return Long.valueOf(value);
         }
 
         public float getEventLogPercent(String key) {
             Float value = _jdbc().queryForObject(
-                _lookup("log_loader_percent"), Float.class, key); //$NON-NLS-1$
+                    _lookup("log_loader_percent"), Float.class, key); //$NON-NLS-1$
             return value;
         }
 
-        public List<Object[]> getEventLogPartitions(Collection<String> types,
-                Collection<String> actions, long offset, long limit) {
-            final String query = _lookup("log_loader_partition"); // $NON_NLS-1$
-            final Map<String, Object> params = new HashMap<String, Object>();
-            params.put("types", types);
-            params.put("actions", actions);
-            params.put("currentid", offset);
-            params.put("max", limit);
-            return _jdbc().query(query,
-                new RowMapper<Object[]>() {
-                    @Override
-                    public Object[] mapRow(ResultSet arg0, int arg1)
-                            throws SQLException {
-                        return new Object[] {
-                            arg0.getLong(1),
-                            arg0.getString(2),
-                            arg0.getLong(3),
-                            arg0.getString(4),
-                            arg0.getInt(5)
-                        };
-                    }}, params);
+        public List<Object[]> getEventLogPartitions(Collection<String> types, Collection<String> actions, long offset,
+                                                    long limit) {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("types", types);
+            params.addValue("actions", actions);
+            params.addValue("currentid", offset);
+            params.addValue("max", limit);
+
+            return _namedJdbc().query(_lookup("log_loader_partition"), params, (arg0, arg1) -> new Object[]{
+                    arg0.getLong(1),
+                    arg0.getString(2),
+                    arg0.getLong(3),
+                    arg0.getString(4),
+                    arg0.getInt(5)
+            });
         }
 
         public void setCurrentEventLog(long id, String key) {
-
             int count = _jdbc().update(
-                _lookup("log_loader_update"), Long.toString(id), //$NON-NLS-1$
-                key);
+                    _lookup("log_loader_update"), Long.toString(id), //$NON-NLS-1$
+                    key);
 
             if (count == 0) {
                 _jdbc().update(
@@ -1189,27 +1167,19 @@ public interface SqlAction {
 
         public void delCurrentEventLog(String key) {
             _jdbc().update(
-                _lookup("log_loader_delete"), key); //$NON-NLS-1$
+                    _lookup("log_loader_delete"), key); //$NON-NLS-1$
 
         }
 
         @Override
         public void refreshEventLogFromUpdatedAnnotations() {
-            _jdbc().query(_lookup("event_log.refresh"), new RowMapper<Object>() {
-                @Override
-                public Object mapRow(ResultSet arg0, int arg1) {
-                    return null;
-                }});
+            _namedJdbc().query(_lookup("event_log.refresh"), (arg0, arg1) -> null);
         }
 
         @Override
         public boolean hasUnicodeUnits() {
             try {
-                _jdbc().query(_lookup("check_units"), new RowMapper<Object>() {
-                    @Override
-                    public Object mapRow(ResultSet rs, int rowNum) {
-                        return null;
-                    }});
+                _namedJdbc().query(_lookup("check_units"), (rs, rowNum) -> null);
             } catch (DataAccessException dae) {
                 return false;
             }
@@ -1219,38 +1189,34 @@ public interface SqlAction {
         @Override
         public void addMessageWithinDbPatchStart(String version, int patch, String message) {
             final Map<String, Object> parameters =
-                    ImmutableMap.<String, Object>of("version", version, "patch", patch, "message", message);
-            _jdbc().update(_lookup("adjust_within_patch.start"), parameters);
+                    ImmutableMap.of("version", version, "patch", patch, "message", message);
+            _namedJdbc().update(_lookup("adjust_within_patch.start"), parameters);
         }
 
         @Override
         public void addMessageWithinDbPatchEnd(String version, int patch, String message) {
             final Map<String, Object> parameters =
-                    ImmutableMap.<String, Object>of("version", version, "patch", patch, "message", message);
-            _jdbc().update(_lookup("adjust_within_patch.end"), parameters);
+                    ImmutableMap.of("version", version, "patch", patch, "message", message);
+            _namedJdbc().update(_lookup("adjust_within_patch.end"), parameters);
         }
 
         public Map<Long, byte[]> getShareData(List<Long> ids) {
-            final Map<Long, byte[]> rv = new HashMap<Long, byte[]>();
+            final Map<Long, byte[]> rv = new HashMap<>();
             if (ids == null || ids.isEmpty()) {
                 return rv;
             }
 
-            final Map<String, List<Long>> params = new HashMap<String, List<Long>>();
+            final Map<String, List<Long>> params = new HashMap<>();
             params.put("ids", ids);
 
-            RowMapper<Object> mapper = new RowMapper<Object>() {
-                @Override
-                public Object mapRow(ResultSet arg0, int arg1)
-                        throws SQLException {
-                    Long id = arg0.getLong(1);
-                    byte[] data = arg0.getBytes(2);
-                    rv.put(id, data);
-                    return null;
-                }
+            RowMapper<Object> mapper = (arg0, arg1) -> {
+                Long id = arg0.getLong(1);
+                byte[] data = arg0.getBytes(2);
+                rv.put(id, data);
+                return null;
             };
-            _jdbc().query(_lookup("share_data"), //$NON-NLS-1$
-                    mapper, params);
+            _namedJdbc().query(_lookup("share_data"), //$NON-NLS-1$
+                    params, mapper);
             return rv;
         }
     }

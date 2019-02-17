@@ -330,7 +330,7 @@ implements java.io.Serializable, IObject
 #foreach($prop in $type.properties)
 #if($prop.class.name == "ome.dsl.EntryField")
 #set($enumSymbol = ${prop.name.replaceAll("-","_").replaceAll("([a-z])([A-Z])", "$1_$2").toUpperCase().replaceAll("[^A-Z0-9_]","")})
-    public final static String VALUE_${enumSymbol} = "${prop.name}";
+    public static final String VALUE_${enumSymbol} = "${prop.name}";
 #end
 #end
 
@@ -340,10 +340,10 @@ implements java.io.Serializable, IObject
     * Constants naming filters used by the OMERO
     * security system.
     */
-    public final static String OWNER_FILTER = "${ofilter}";
-    public final static String GROUP_FILTER = "${gfilter}";
-    public final static String EVENT_FILTER = "${efilter}";
-    public final static String PERMS_FILTER = "${pfilter}";
+    public static final String OWNER_FILTER = "${ofilter}";
+    public static final String GROUP_FILTER = "${gfilter}";
+    public static final String EVENT_FILTER = "${efilter}";
+    public static final String PERMS_FILTER = "${pfilter}";
 
 #end
     public ${type.shortname} () {
@@ -397,8 +397,8 @@ implements java.io.Serializable, IObject
 #end## END ctorWithRequiredNeeded
 
 #if(!${type.superclass})
-    public final static String ID = "${type.id}_id";
-    
+    public static final String ID = "${type.id}_id";
+
     protected Long id;
 
    /**
@@ -414,7 +414,7 @@ implements java.io.Serializable, IObject
     @javax.persistence.Id
     @javax.persistence.GeneratedValue(
         strategy=javax.persistence.GenerationType.SEQUENCE,
-        generator="seq_${type.table}") 
+        generator="seq_${type.table}")
     @org.hibernate.search.annotations.DocumentId
     @Override
     public Long getId() {
@@ -435,7 +435,7 @@ implements java.io.Serializable, IObject
     */
 
 #if(!${type.immutable} && !${type.superclass})
-    public final static String VERSION = "${type.id}_version";
+    public static final String VERSION = "${type.id}_version";
 
     protected Integer version = 0;
 
@@ -443,8 +443,8 @@ implements java.io.Serializable, IObject
     * This version number is controlled by the database for optimisitic
     * locking.
     */
-    @javax.persistence.Column(name="version") 
-    // @javax.persistence.Version 
+    @javax.persistence.Column(name="version")
+    // @javax.persistence.Version
 //TODO mark off #118 if this succeeds, otherwise, completely remove versions and test updateEvent
     @Override
     public Integer getVersion() {
@@ -469,7 +469,7 @@ implements java.io.Serializable, IObject
 
 #foreach($prop in $type.classProperties)#######################################EACH
 ##
-##  Now we iterate throug each of the properties and based on the type we 
+##  Now we iterate throug each of the properties and based on the type we
 ##  generate the appropriate methods.
 ##
 ##
@@ -540,11 +540,11 @@ implements java.io.Serializable, IObject
         return this.details;
     }
 
-   /**
-    * Use the {@link ome.model.internal.Details#copy(ome.model.internal.Details)}
-    * or {@link ome.model.internal.Details#shallowCopy(ome.model.internal.Details)}
-    * methods to set the {@link Details} instance instead.
-    */
+##   /**
+##    * Use the {@link ome.model.internal.Details#copy(ome.model.internal.Details})}
+##    * or {@link ome.model.internal.Details#shallowCopy(ome.model.internal.Details)}
+##    * methods to set the {@link Details} instance instead.
+##    */
     protected void setDetails(ome.model.internal.Details details) {
         $errorIfUnloaded
         this.details = (Details) details;
@@ -584,10 +584,10 @@ implements java.io.Serializable, IObject
     * Filter names which are used by the security system to turn on filters
     * for this particular collection.
     */
-    public final static String OWNER_FILTER_${prop.nameUpper} = "${ofilter}_${prop.nameUpper}";
-    public final static String GROUP_FILTER_${prop.nameUpper} = "${gfilter}_${prop.nameUpper}";
-    public final static String EVENT_FILTER_${prop.nameUpper} = "${efilter}_${prop.nameUpper}";
-    public final static String PERMS_FILTER_${prop.nameUpper} = "${pfilter}_${prop.nameUpper}";
+    public static final String OWNER_FILTER_${prop.nameUpper} = "${ofilter}_${prop.nameUpper}";
+    public static final String GROUP_FILTER_${prop.nameUpper} = "${gfilter}_${prop.nameUpper}";
+    public static final String EVENT_FILTER_${prop.nameUpper} = "${efilter}_${prop.nameUpper}";
+    public static final String PERMS_FILTER_${prop.nameUpper} = "${pfilter}_${prop.nameUpper}";
 #end
 
    /**
@@ -775,10 +775,10 @@ implements java.io.Serializable, IObject
 ##  These methods represent our handling of Hibernate's "inverse" sets
 ##  which do not act as expected with regards to getters & setters.
 ##
-##  To prevent users from making mistakes like not properly setting both 
+##  To prevent users from making mistakes like not properly setting both
 ##  sides of a relationship, these fields are hidden, and only accessible via
-##  the following methods. Methods fall into several categories: 
-##    (A) general   
+##  the following methods. Methods fall into several categories:
+##    (A) general
 ##    (B) list-only
 ##    (C) link-based
 ##
@@ -1045,12 +1045,12 @@ implements java.io.Serializable, IObject
         list.set(0, element);
         return old;
     }
-    
-    
-## TODO 
+
+
+## TODO
 ## ListIterator<${prop.type}> listIterator${prop.nameCapped}()
 ## public int indexOf(${prop.type} elt)
-## public int lastIndexOf(${prop.type} elt) 
+## public int lastIndexOf(${prop.type} elt)
 ## List<${prop.type}> subList${prop.nameCapped}}(int fromIndex, int toIndex)
 #end
 ##
@@ -1328,13 +1328,13 @@ implements java.io.Serializable, IObject
     }
 #else## REGULAR PROPERTY #################################################TYPE
    /**
-    * Simple field ${type.id}.${prop.name} (${prop.type}) 
+    * Simple field ${type.id}.${prop.name} (${prop.type})
     */
     ${type.typeAnnotation($prop)}
 #if($prop.type == "java.lang.String")
     @org.hibernate.search.annotations.Fields({
         @org.hibernate.search.annotations.Field(index = org.hibernate.search.annotations.Index.TOKENIZED),
-        @org.hibernate.search.annotations.Field(index = org.hibernate.search.annotations.Index.TOKENIZED, 
+        @org.hibernate.search.annotations.Field(index = org.hibernate.search.annotations.Index.TOKENIZED,
             name="combined_fields")
     })
 #elseif($prop.type == "java.lang.Integer" || $prop.type == "java.lang.Long" || $prop.type == "java.lang.Double" || $prop.type == "java.lang.Float")
@@ -1469,12 +1469,12 @@ implements java.io.Serializable, IObject
 
 #foreach($prop in $type.classProperties)
 #if($prop.one2Many && $prop.isLink && !$prop.actualTarget.global)
-    public final static String ${prop.name.toUpperCase()}COUNTPEROWNER = "${type.id}_${prop.name}CountPerOwner";
+    public static final String ${prop.name.toUpperCase()}COUNTPEROWNER = "${type.id}_${prop.name}CountPerOwner";
 #end
-    public final static String ${prop.nameUpper} = "${type.id}_${prop.name}";
+    public static final String ${prop.nameUpper} = "${type.id}_${prop.name}";
 #end
 
-    public final static java.util.Set<String> FIELDS;
+    public static final java.util.Set<String> FIELDS;
     static {
        java.util.Set<String> raw = new java.util.HashSet<String>();
 #if(!$type.superclass)
@@ -1693,7 +1693,7 @@ implements java.io.Serializable, IObject
 #if(!$type.superclass)
     public static class Details extends ome.model.internal.Details {
 
-        private final static long serialVersionUID = 0000000030000020301L;
+        private static final long serialVersionUID = 0000000030000020301L;
 
         public Details() {
             super();
@@ -1781,15 +1781,15 @@ implements java.io.Serializable, IObject
             return null;
         }
 
-       /**
-        * Overrides {@link ome.model.internal.Details#setUpdateEvent(ome.model.meta.Event)} to
-        * do nothing.
-        */
+##       /**
+##        * Overrides {@link ome.model.internal.Details#setUpdateEvent(ome.model.meta.Event)} to
+##        * do nothing.
+##        */
         @Override
         public void setUpdateEvent(ome.model.meta.Event event) {
             // do nothing
         }
-       
+
 #end
 #end
 

@@ -8,8 +8,8 @@ package ome.conditions;
 
 /**
  * Alerts a user to a misuse of an Omero method call. This includes
- * {@link java.lang.IllegalArgumentException}-like and often
- * {@link java.lang.IllegalStateException}-like matters. The Api which is
+ * {@link IllegalArgumentException}-like and often
+ * {@link IllegalStateException}-like matters. The Api which is
  * broken may be declaratively checked with annotations and an interceptor or at
  * run-time with simple assertions.
  * 

@@ -149,7 +149,9 @@ public abstract class ModelMapper extends ContextFilter {
                 targetType = findClass(currentType);
 
                 if (null == targetType) {
-                    throw new InternalException("Cannot handle type:" + current);
+                    String msg = "Cannot handle type:" + current + "\n"
+                            + "currentType: " + currentType;
+                    throw new InternalException(msg);
                 }
 
                 try {

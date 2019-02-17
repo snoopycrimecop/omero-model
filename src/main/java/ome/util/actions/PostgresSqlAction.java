@@ -5,8 +5,18 @@
 
 package ome.util.actions;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.google.common.collect.Iterables;
+import ome.conditions.InternalException;
+import ome.util.SqlAction;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,35 +27,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ome.conditions.InternalException;
-import ome.util.SqlAction;
-
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.jdbc.core.ConnectionCallback;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
-import org.springframework.jdbc.core.simple.SimpleJdbcOperations;
-
-import com.google.common.collect.Iterables;
-
 public class PostgresSqlAction extends SqlAction.Impl {
 
-    private final SimpleJdbcOperations jdbc;
+    private final JdbcTemplate jdbc;
+    private final NamedParameterJdbcTemplate namedJdbc;
 
-    public PostgresSqlAction(SimpleJdbcOperations jdbc) {
+    public PostgresSqlAction(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
+        this.namedJdbc = new NamedParameterJdbcTemplate(jdbc);
     }
 
     //
     // Impl methods
     //
 
+
     @Override
-    protected SimpleJdbcOperations _jdbc() {
+    protected JdbcTemplate _jdbc() {
         return this.jdbc;
+    }
+
+    @Override
+    protected NamedParameterJdbcTemplate _namedJdbc() {
+        return namedJdbc;
     }
 
     @Override
@@ -70,8 +74,7 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     public void prepareSession(final long eventId, final long userId, final long groupId) {
-        JdbcTemplate jt = (JdbcTemplate) _jdbc().getJdbcOperations(); // FIXME
-        SimpleJdbcCall call = new SimpleJdbcCall(jt).withFunctionName("_prepare_session");
+        SimpleJdbcCall call = new SimpleJdbcCall(_jdbc()).withFunctionName("_prepare_session"); // FIXME
         MapSqlParameterSource in = new MapSqlParameterSource();
         in.addValue("_event_id", eventId);
         in.addValue("_user_id", userId);
@@ -80,7 +83,7 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     public boolean activeSession(String sessionUUID) {
-        int count = _jdbc().queryForInt(_lookup("active_session"), //$NON-NLS-1$
+        int count = _jdbc().queryForObject(_lookup("active_session"), Integer.class, //$NON-NLS-1$
                 sessionUUID);
         return count > 0;
     }
@@ -91,32 +94,27 @@ public class PostgresSqlAction extends SqlAction.Impl {
     public int synchronizeJobs(List<Long> ids) {
         int count = 0;
         if (ids.size() > 0) {
-            Map<String, Object> m = new HashMap<String, Object>();
+            Map<String, Object> m = new HashMap<>();
             m.put("ids", ids); //$NON-NLS-1$
-            count += _jdbc().update(
-                            synchronizeJobsSql + _lookup("id_not_in"), m); //$NON-NLS-1$
+            count += _namedJdbc().update(
+                    synchronizeJobsSql + _lookup("id_not_in"), m); //$NON-NLS-1$
         } else {
             count += _jdbc().update(synchronizeJobsSql);
         }
         return count;
     }
 
-    public List<Long> findRepoPixels(String uuid, String dirname, String basename){
+    public List<Long> findRepoPixels(String uuid, String dirname, String basename) {
         return _jdbc().query(_lookup("find_repo_pixels"), //$NON-NLS-1$
-                new RowMapper<Long>() {
-                    public Long mapRow(ResultSet arg0, int arg1)
-                            throws SQLException {
-                        return arg0.getLong(1);
-                    }
-                }, uuid, dirname, basename);
+                (arg0, arg1) -> arg0.getLong(1), uuid, dirname, basename);
     }
 
     public Long findRepoImageFromPixels(long id) {
-        return _jdbc().queryForLong(_lookup("find_repo_image_from_pixels"), id); //$NON-NLS-1$
+        return _jdbc().queryForObject(_lookup("find_repo_image_from_pixels"), Long.class, id); //$NON-NLS-1$
     }
 
     public Long nextSessionId() {
-        return _jdbc().queryForLong(_lookup("next_session")); //$NON-NLS-1$
+        return _jdbc().queryForObject(_lookup("next_session"), Long.class); //$NON-NLS-1$
     }
 
     public Map<String, Object> repoFile(long value) {
@@ -124,7 +122,7 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     public long countFormat(String name) {
-        return _jdbc().queryForLong(_lookup("count_format"), name); //$NON-NLS-1$
+        return _jdbc().queryForObject(_lookup("count_format"), Long.class, name); //$NON-NLS-1$
     }
 
     // Copied from data.vm
@@ -142,16 +140,16 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     public long nodeId(String internal_uuid) {
-        return _jdbc().queryForLong(_lookup("internal_uuid"), //$NON-NLS-1$
+        return _jdbc().queryForObject(_lookup("internal_uuid"), Long.class,//$NON-NLS-1$
                 internal_uuid);
     }
 
     public int insertSession(Map<String, Object> params) {
-        return _jdbc().update(_lookup("insert_session"), params); //$NON-NLS-1$
+        return _namedJdbc().update(_lookup("insert_session"), params); //$NON-NLS-1$
     }
 
     public Long sessionId(String uuid) {
-        return _jdbc().queryForLong(_lookup("session_id"), uuid); //$NON-NLS-1$
+        return _jdbc().queryForObject(_lookup("session_id"), Long.class, uuid); //$NON-NLS-1$
     }
 
     public int removePassword(Long id) {
@@ -169,27 +167,19 @@ public class PostgresSqlAction extends SqlAction.Impl {
 
     public String dbVersion() {
         return _jdbc().query(_lookup("db_version"), //$NON-NLS-1$
-                new RowMapper<String>() {
-                    public String mapRow(ResultSet arg0, int arg1)
-                            throws SQLException {
-                        String v = arg0.getString("currentversion"); //$NON-NLS-1$
-                        int p = arg0.getInt("currentpatch"); //$NON-NLS-1$
-                        return v + "__" + p; //$NON-NLS-1$
-                    }
+                (arg0, arg1) -> {
+                    String v = arg0.getString("currentversion"); //$NON-NLS-1$
+                    int p = arg0.getInt("currentpatch"); //$NON-NLS-1$
+                    return v + "__" + p; //$NON-NLS-1$
                 }).get(0);
     }
 
     public String dbUuid() {
         return _jdbc().query(_lookup("db_uuid"), //$NON-NLS-1$
-                new RowMapper<String>() {
-                    public String mapRow(ResultSet arg0, int arg1)
-                            throws SQLException {
-                        String s = arg0.getString("value"); //$NON-NLS-1$
-                        return s;
-                    }
-
+                (arg0, arg1) -> {
+                    String s = arg0.getString("value"); //$NON-NLS-1$
+                    return s;
                 }).get(0);
-
     }
 
     private final static String logLoaderQuerySql = PsqlStrings
@@ -202,7 +192,7 @@ public class PostgresSqlAction extends SqlAction.Impl {
             .getString("sql_action.log_loader_delete"); //$NON-NLS-1$
 
     public long selectCurrentEventLog(String key) {
-        return _jdbc().queryForLong(logLoaderQuerySql, key);
+        return _jdbc().queryForObject(logLoaderQuerySql, Long.class, key);
     }
 
     public void setCurrentEventLog(long id, String key) {
@@ -217,17 +207,16 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     public long nextValue(String segmentValue, int incrementSize) {
-        return _jdbc().queryForLong(_lookup("next_val"), //$NON-NLS-1$
+        return _jdbc().queryForObject(_lookup("next_val"), Long.class, //$NON-NLS-1$
                 segmentValue, incrementSize);
     }
 
     public long currValue(String segmentName) {
         try {
-            long next_value = _jdbc().queryForLong(_lookup("curr_val"), //$NON-NLS-1$
+            return _jdbc().queryForObject(_lookup("curr_val"), Long.class, //$NON-NLS-1$
                     segmentName);
-            return next_value;
         } catch (EmptyResultDataAccessException erdae) {
-            return -1l;
+            return -1L;
         }
     }
 
@@ -236,11 +225,9 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     public List<Map<String, Object>> roiByImage(final long imageId) {
-        String queryString;
-        queryString = _lookup("roi_by_image"); //$NON-NLS-1$
-        List<Map<String, Object>> mapList = _jdbc().queryForList(queryString,
+        String queryString = _lookup("roi_by_image"); //$NON-NLS-1$
+        return _jdbc().queryForList(queryString,
                 imageId);
-        return mapList;
     }
 
     public List<Long> getShapeIds(long roiId) {
@@ -250,17 +237,18 @@ public class PostgresSqlAction extends SqlAction.Impl {
 
     @Override
     public void setFileRepo(Collection<Long> ids, String repoId) {
-       for (final List<Long> idsBatch : Iterables.partition(ids, 256)) {
-           final Map<String, Object> parameters = new HashMap<String, Object>();
-           parameters.put("ids", idsBatch);
-           parameters.put("repo", repoId);
-           _jdbc().update(_lookup("set_file_repo"), //$NON-NLS-1$
-                   parameters);
-       }
+        for (final List<Long> idsBatch : Iterables.partition(ids, 256)) {
+            final Map<String, Object> params = new HashMap<>();
+            params.put("ids", idsBatch);
+            params.put("repo", repoId);
+
+            _namedJdbc().update(_lookup("set_file_repo"), //$NON-NLS-1$
+                    params);
+        }
     }
 
     public void setPixelsNamePathRepo(long pixId, String name, String path,
-            String repoId) {
+                                      String repoId) {
         _jdbc().update(_lookup("update_pixels_name"), name, pixId); //$NON-NLS-1$
         _jdbc().update(_lookup("update_pixels_path"), path, pixId); //$NON-NLS-1$
         _jdbc().update(_lookup("update_pixels_repo"), repoId, //$NON-NLS-1$
@@ -268,22 +256,9 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     public List<Long> getDeletedIds(String entityType) {
-        List<Long> list;
-
         String sql = _lookup("get_delete_ids"); //$NON-NLS-1$
-
-        RowMapper<Long> mapper = new RowMapper<Long>() {
-            public Long mapRow(ResultSet resultSet, int rowNum)
-                    throws SQLException {
-                Long id = new Long(resultSet.getString(1));
-                return id;
-            }
-        };
-
-        list = _jdbc().query(sql, mapper, new Object[] { entityType });
-
-        return list;
-
+        RowMapper<Long> mapper = (resultSet, rowNum) -> new Long(resultSet.getString(1));
+        return _jdbc().query(sql, mapper, entityType);
     }
 
     public void createSavepoint(String savepoint) {
@@ -299,58 +274,42 @@ public class PostgresSqlAction extends SqlAction.Impl {
     }
 
     private void call(final String call, final String savepoint) {
-        _jdbc().getJdbcOperations().execute(new ConnectionCallback() {
-            public Object doInConnection(java.sql.Connection connection)
-                    throws SQLException {
-                connection.prepareCall(call + savepoint).execute(); // TODO Use
-                                                                    // a
-                                                                    // different
-                                                                    // callback
-                return null;
-            }
+        _jdbc().execute((ConnectionCallback<Object>) con -> {
+            con.prepareCall(call + savepoint).execute(); // TODO Use a difference callback
+            return null;
         });
     }
 
     public void deferConstraints() {
-        _jdbc().getJdbcOperations().execute(new ConnectionCallback() {
-            public Object doInConnection(java.sql.Connection connection)
-                    throws SQLException {
-                Statement statement = connection.createStatement();
-                statement.execute("set constraints all deferred;");
-                return null;
-            }
+        _jdbc().execute((ConnectionCallback<Object>) con -> {
+            Statement statement = con.createStatement();
+            statement.execute("set constraints all deferred;");
+            return null;
         });
     }
 
     public Set<String> currentUserNames() {
         List<String> names = _jdbc().query(_lookup("current_user_names"),  //$NON-NLS-1$
-                        new RowMapper<String>() {
-                            public String mapRow(ResultSet arg0, int arg1)
-                                    throws SQLException {
-                                return arg0.getString(1); // Bleck
-                            }
-                        });
-        return new HashSet<String>(names);
+                (arg0, arg1) -> {
+                    return arg0.getString(1); // Bleck
+                });
+        return new HashSet<>(names);
     }
 
     /* (non-Javadoc)
      * @see ome.util.SqlAction#getPixelsNamePathRepo(long)
      */
     public List<String> getPixelsNamePathRepo(long id)
-            throws InternalException
-    {
+            throws InternalException {
         try {
             return _jdbc().queryForObject(
                     _lookup("get_pixels_name_path_repo"), //$NON-NLS-1$
-                    new RowMapper<List<String>>() {
-                        public List<String> mapRow(ResultSet arg0, int arg1)
-                                throws SQLException {
-                            final List<String> values = new ArrayList<String>();
-                            values.add(arg0.getString(1));
-                            values.add(arg0.getString(2));
-                            values.add(arg0.getString(3));
-                            return values;
-                        }
+                    (arg0, arg1) -> {
+                        final List<String> values = new ArrayList<>();
+                        values.add(arg0.getString(1));
+                        values.add(arg0.getString(2));
+                        values.add(arg0.getString(3));
+                        return values;
                     }, id);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -377,6 +336,6 @@ public class PostgresSqlAction extends SqlAction.Impl {
         log.error(e.toString()); // slf4j migration: toString()
         throw new InternalException(
                 "Potential jdbc jar error during pgarray access (See #7432)\n"
-                + printThrowable(e));
+                        + printThrowable(e));
     }
 }

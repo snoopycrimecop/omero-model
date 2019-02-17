@@ -10,7 +10,7 @@ import ome.conditions.SecurityViolation;
 import ome.model.IObject;
 
 /**
- * holds information regarding the graph to which an {@link ome.model.IObject}
+ * holds information regarding the graph to which an {@link IObject}
  * belongs.
  * 
  * {@link GraphHolder#hasToken()}, {@link GraphHolder#tokenMatches(Token)},

@@ -1,15 +1,15 @@
 package ome.model.units;
 
+import org.hibernate.HibernateException;
+import org.hibernate.usertype.ParameterizedType;
+import org.hibernate.usertype.UserType;
+
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Properties;
-
-import org.hibernate.HibernateException;
-import org.hibernate.usertype.ParameterizedType;
-import org.hibernate.usertype.UserType;
 
 /**
  * http://octagen.at/2014/10/postgresql-custom-data-types-enum-in-hibernate/

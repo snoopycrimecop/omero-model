@@ -6,12 +6,12 @@
  */
 package ome.model;
 
+import ome.model.annotations.Annotation;
+import ome.util.CBlock;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import ome.model.annotations.Annotation;
-import ome.util.CBlock;
 
 /**
  * @author Josh Moore, josh at glencoesoftware.com
