@@ -4,6 +4,9 @@ plugins {
     id "org.openmicroscopy.dsl" version "5.5.0-SNAPSHOT"
 }
 
+group = "org.openmicroscopy"
+version = "5.5.0-SNAPSHOT"
+
 repositories {
     mavenLocal()
     jcenter()
@@ -16,9 +19,6 @@ repositories {
         url "https://artifacts.unidata.ucar.edu/repository/unidata-all/"
     }
 }
-
-group = "org.openmicroscopy"
-version = "5.5.0-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
