@@ -15,4 +15,4 @@ deploy:
   script: ./gradlew publish
   skip_cleanup: true
   on:
-    branch: deploy
+    tags: true
