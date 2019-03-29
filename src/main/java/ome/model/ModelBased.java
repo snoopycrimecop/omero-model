@@ -17,8 +17,8 @@ import ome.util.ReverseModelMapper;
  * In reverse mapping, however, the burden of mapping can be placed on the
  * foreign (target) objects, which simplifies the process.
  * 
- * @author Josh Moore &nbsp;&nbsp;&nbsp;&nbsp; <a
- *         href="mailto:josh.moore@gmx.de">josh.moore@gmx.de</a>
+ * @author Josh Moore &nbsp;&nbsp;&nbsp;&nbsp;
+ *         <a href="mailto:josh.moore@gmx.de">josh.moore@gmx.de</a>
  * @since 2.5
  * @see ome.util.ModelMapper
  * @see ome.util.ReverseModelMapper

@@ -1,6 +1,4 @@
 /*
- * ome.parameters.QueryParameter
- *
  *   Copyright 2006 University of Dundee. All rights reserved.
  *   Use is subject to license terms supplied in LICENSE.txt
  */
@@ -18,8 +16,8 @@ import ome.conditions.ApiUsageException;
  * arbitrary query parameter used by {@code ome.api.IQuery}.
  * 
  * @author <br>
- *         Josh Moore&nbsp;&nbsp;&nbsp;&nbsp; <a
- *         href="mailto:josh.moore@gmx.de"> josh.moore@gmx.de</a>
+ *         Josh Moore&nbsp;&nbsp;&nbsp;&nbsp;
+ *         <a href="mailto:josh.moore@gmx.de"> josh.moore@gmx.de</a>
  * @version 3.0
  * @since 3.0-M2
  */

@@ -45,8 +45,7 @@ import ome.conditions.ApiUsageException;
  * grant/revoke/isSet logic will remain the same.
  * </p>
  * 
- * @see <a
- *      href="https://trac.openmicroscopy.org/ome/ticket/180">ticket:180</a>
+ * @see <a href="https://trac.openmicroscopy.org/ome/ticket/180">ticket:180</a>
  */
 public class Permissions implements Serializable {
 

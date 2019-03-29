@@ -1,6 +1,4 @@
 /*
- * ome.util.PixelData
- *
  *   Copyright 2007-2014 Glencoe Software Inc. All rights reserved.
  *   Use is subject to license terms supplied in LICENSE.txt
  */
@@ -19,8 +17,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents a block of pixel data.
  *
- * @author Chris Allan &nbsp;&nbsp;&nbsp;&nbsp; <a
- *         href="mailto:chris@glencoesoftware.com">chris@glencoesoftware.com</a>
+ * @author Chris Allan &nbsp;&nbsp;&nbsp;&nbsp;
+ *         <a href="mailto:chris@glencoesoftware.com">chris@glencoesoftware.com</a>
  * @author m.t.b.carroll@dundee.ac.uk
  * @version $Revision$
  * @since 3.0

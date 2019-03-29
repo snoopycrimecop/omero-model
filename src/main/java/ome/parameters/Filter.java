@@ -1,6 +1,4 @@
 /*
- * ome.parameters.Filter
- *
  *   Copyright 2006 University of Dundee. All rights reserved.
  *   Use is subject to license terms supplied in LICENSE.txt
  */
@@ -14,8 +12,8 @@ import java.sql.Timestamp;
  * parameter to generally reduce the size of a query result set.
  * 
  * @author <br>
- *         Josh Moore&nbsp;&nbsp;&nbsp;&nbsp; <a
- *         href="mailto:josh.moore@gmx.de"> josh.moore@gmx.de</a>
+ *         Josh Moore&nbsp;&nbsp;&nbsp;&nbsp;
+ *         <a href="mailto:josh.moore@gmx.de"> josh.moore@gmx.de</a>
  * @version 3.0
  * @since 3.0-M2
  */

@@ -9,15 +9,13 @@ package ome.conditions;
 /**
  * More specific {@link ome.conditions.ApiUsageException ApiUsageException}, in
  * that the current use of the OMERO API could overwhelm the server and has been blocked.
- * 
- * <p>
+ *
  * Examples include:
  * <ul>
  * <li>Creating too many sessions in too short a period of time</li>
- * <li>Opening too many stateful services
+ * <li>Opening too many stateful services</li>
  * <li>Requesting too many database objects in one call</li>
  * </ul>
- * </p>
  * 
  * @author Josh Moore, josh at glencoesoftware.com
  * @since 4.0

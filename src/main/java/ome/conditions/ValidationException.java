@@ -1,6 +1,4 @@
 /*
- * ome.conditions.ValidationException
- *
  *   Copyright 2006 University of Dundee. All rights reserved.
  *   Use is subject to license terms supplied in LICENSE.txt
  */
@@ -10,17 +8,15 @@ package ome.conditions;
  * More specific {@link ome.conditions.ApiUsageException ApiUsageException}, in
  * that the specification of your data as outlined in the OME specification is
  * incorrect.
- * 
- * <p>
+ *
  * Examples include:
  * <ul>
  * <li>a {@link ome.model.containers.Project Project} name with invalid
  * characters</li>
  * </ul>
- * </p>
  * 
- * @author Josh Moore &nbsp;&nbsp;&nbsp;&nbsp; <a
- *         href="mailto:josh.moore@gmx.de">josh.moore@gmx.de</a>
+ * @author Josh Moore &nbsp;&nbsp;&nbsp;&nbsp;
+ *         <a href="mailto:josh.moore@gmx.de">josh.moore@gmx.de</a>
  * @version 3.0
  * @since 3.0
  */

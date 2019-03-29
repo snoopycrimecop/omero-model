@@ -17,8 +17,8 @@ import java.awt.image.WritableRaster;
 /**
  * Provides helper methods for performing various things on image data.
  * 
- * @author Chris Allan &nbsp;&nbsp;&nbsp;&nbsp; <a
- *         href="mailto:callan@blackcat.ca">callan@blackcat.ca</a>
+ * @author Chris Allan &nbsp;&nbsp;&nbsp;&nbsp;
+ *         <a href="mailto:callan@blackcat.ca">callan@blackcat.ca</a>
  * @version 3.0
  * @since 3.0
  */
