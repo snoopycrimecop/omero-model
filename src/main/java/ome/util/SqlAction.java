@@ -1059,9 +1059,13 @@ public interface SqlAction {
         }
 
         public String fileRepo(long fileId) {
-            return _jdbc().queryForObject(
-                    _lookup("file_repo"), String.class, //$NON-NLS-1$
-                    fileId);
+            try {
+                return _jdbc().queryForObject(
+                        _lookup("file_repo"), String.class, //$NON-NLS-1$
+                        fileId);
+            } catch (EmptyResultDataAccessException e) {
+                return null;
+            }
         }
 
         public String scriptRepo(long fileId, Set<String> mimetypes) {
