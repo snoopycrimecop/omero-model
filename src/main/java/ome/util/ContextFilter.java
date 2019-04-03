@@ -35,15 +35,17 @@ import org.slf4j.LoggerFactory;
  *
  * Note: This class is not thread-safe.
  *
- * template method to filter domain objects. The standard idiom is: <code>
+ * template method to filter domain objects. The standard idiom is:
+ * <pre>
+ * {@code
  *  if (m != null && hasntSeen(m)){
  *      enter(m); // Provides context
  *      addSeen(m); // Prevents looping
  *      m.acceptFilter(this); // Visits all fields
  *      exit(m); // Remove from context
  *  }
- *
- * </code>
+ *}
+ * </pre>
  *
  *
  * Implementation notes: - nulls are already "seen"

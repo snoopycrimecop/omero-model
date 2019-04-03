@@ -15,7 +15,7 @@ import java.util.Locale;
 /**
  * This class represents an LSID as used by the OME-XML data model.
  * 
- * @author Chris Allan <callan at blackcat dot ca>
+ * @author Chris Allan callan at blackcat dot ca
  *
  */
 public class LSID

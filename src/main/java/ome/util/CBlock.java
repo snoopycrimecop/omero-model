@@ -1,6 +1,4 @@
 /*
- * ome.util.CBlock
- *
  *   Copyright 2006 University of Dundee. All rights reserved.
  *   Use is subject to license terms supplied in LICENSE.txt
  */
@@ -17,8 +15,8 @@ import ome.model.core.Image;
  * valued fields on model objects have a method that will scan the collection
  * and apply the block of code. For example, {@link Image#collectPixels(CBlock)}
  * 
- * @author Josh Moore &nbsp;&nbsp;&nbsp;&nbsp; <a
- *         href="mailto:josh.moore@gmx.de">josh.moore@gmx.de</a>
+ * @author Josh Moore &nbsp;&nbsp;&nbsp;&nbsp;
+ *         <a href="mailto:josh.moore@gmx.de">josh.moore@gmx.de</a>
  * @version 3.0
  * @since 3.0
  */
