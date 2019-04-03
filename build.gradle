@@ -29,11 +29,9 @@ dependencies {
     api("org.hibernate:hibernate-search:3.4.2.Final")
 
     // Our libraries
-    api("org.openmicroscopy:ome-xml:5.6.3")
-    api("ome:formats-bsd:5.9.2") {
+    api("ome:formats-gpl:5.9.2") {
         exclude group: "org.perf4j", module: "perf4j"
     }
-    api("ome:formats-gpl:5.9.2")
 
     // Necessary since formats-bsd has version 0.9.13. This should be removed
     // when fixed in B-F
@@ -42,7 +40,6 @@ dependencies {
     // Unidata
     api("edu.ucar:bufr:3.0")
     api("edu.ucar:udunits:4.5.5")
-    api("edu.ucar:netcdf:4.3.22")
 }
 
 test {
