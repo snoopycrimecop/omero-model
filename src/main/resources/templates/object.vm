@@ -11,7 +11,8 @@
 #set($pfilter = "${type.table}_perms_filter")
 
 ## See #1679, #2142 and various others
-#set($cascadeEjb = "javax.persistence.CascadeType.MERGE,")
+#set($cascadeEjb = "javax.persistence.CascadeType.DETACH,")
+#set($cascadeEjb = "$cascadeEjb javax.persistence.CascadeType.MERGE,")
 #set($cascadeEjb = "$cascadeEjb javax.persistence.CascadeType.PERSIST,")
 #set($cascadeEjb = "$cascadeEjb javax.persistence.CascadeType.REFRESH")
 #set($cascadeHib = "org.hibernate.annotations.CascadeType.LOCK,")
@@ -19,8 +20,7 @@
 #set($cascadeHib = "$cascadeHib org.hibernate.annotations.CascadeType.PERSIST,")
 #set($cascadeHib = "$cascadeHib org.hibernate.annotations.CascadeType.REPLICATE,")
 #set($cascadeHib = "$cascadeHib org.hibernate.annotations.CascadeType.REFRESH,")
-#set($cascadeHib = "$cascadeHib org.hibernate.annotations.CascadeType.SAVE_UPDATE,")
-#set($cascadeHib = "$cascadeHib org.hibernate.annotations.CascadeType.EVICT")
+#set($cascadeHib = "$cascadeHib org.hibernate.annotations.CascadeType.SAVE_UPDATE")
 
 #set($errorIfUnloaded = "if (! _loaded ) errorIfUnloaded();" )
 ##
