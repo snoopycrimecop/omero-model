@@ -7,6 +7,9 @@ plugins {
 group = "org.openmicroscopy"
 version = "5.5.0-SNAPSHOT"
 
+ext {
+    databaseType = "psql"
+}
 repositories {
     mavenLocal()
     jcenter()
@@ -53,7 +56,7 @@ test {
 }
 
 dsl {
-    database "psql"
+    database databaseType
 
     multiFile {
         java {
@@ -87,3 +90,12 @@ clean {
     delete dsl.outputDir
 }
 
+processResources {
+    with copySpec {
+        from 'src/main/resources'
+        // Use a closure to remove lines
+        filter { String line ->
+            line.startsWith('omero.db.profile') ? 'omero.db.profile='+databaseType : line
+        }
+    }
+}
