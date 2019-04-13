@@ -93,7 +93,7 @@ clean {
 processResources {
     with copySpec {
         from 'src/main/resources'
-        // Use a closure to remove lines
+        // Set db profile
         filter { String line ->
             line.startsWith('omero.db.profile') ? 'omero.db.profile='+databaseType : line
         }
