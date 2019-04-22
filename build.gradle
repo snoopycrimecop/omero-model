@@ -32,13 +32,7 @@ dependencies {
     api("org.hibernate:hibernate-search:3.4.2.Final")
 
     // Our libraries
-    api("ome:formats-gpl:5.9.2") {
-        exclude group: "org.perf4j", module: "perf4j"
-    }
-
-    // Necessary since formats-bsd has version 0.9.13. This should be removed
-    // when fixed in B-F
-    api("org.perf4j:perf4j:0.9.16")
+    api("ome:formats-gpl:6.1.0-m1")
 
     // Unidata
     api("edu.ucar:bufr:3.0")
