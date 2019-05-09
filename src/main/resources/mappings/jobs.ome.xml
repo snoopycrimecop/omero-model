@@ -71,7 +71,7 @@
 		</properties>
 	</type>
 	<!-- Warning: ImportJob is DEPRECATED and may be removed in OMERO 6.0. -->
-	<type id="ome.model.jobs.ImportJob" superclass="ome.model.jobs.Job">
+	<type id="ome.model.jobs.ImportJob" superclass="ome.model.jobs.Job" deprecated="true">
 		<!-- Note: ImportJob is not in model-->
 		<properties>
 			<required name="imageName" type="text"/>
