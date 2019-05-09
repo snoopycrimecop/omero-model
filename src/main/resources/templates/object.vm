@@ -304,6 +304,9 @@ import ome.model.*;
 #if("" != $type.check)
 @org.hibernate.annotations.Check(constraints="${type.check}")
 #end
+#if($type.deprecated)
+@Deprecated
+#end
 public #if($type.abstract)abstract#end class ${type.shortname}
 #if($type.superclass)extends $type.superclass #end
 implements java.io.Serializable, IObject
@@ -330,6 +333,9 @@ implements java.io.Serializable, IObject
 #foreach($prop in $type.properties)
 #if($prop.class.name == "ome.dsl.EntryField")
 #set($enumSymbol = ${prop.name.replaceAll("-","_").replaceAll("([a-z])([A-Z])", "$1_$2").toUpperCase().replaceAll("[^A-Z0-9_]","")})
+#if($prop.deprecated)
+    @Deprecated
+#end
     public static final String VALUE_${enumSymbol} = "${prop.name}";
 #end
 #end
@@ -469,7 +475,7 @@ implements java.io.Serializable, IObject
 
 #foreach($prop in $type.classProperties)#######################################EACH
 ##
-##  Now we iterate throug each of the properties and based on the type we
+##  Now we iterate through each of the properties and based on the type we
 ##  generate the appropriate methods.
 ##
 ##
@@ -498,6 +504,9 @@ implements java.io.Serializable, IObject
 #set( $cascadeHibCollection = "org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN" )
 #end
 ##
+#if($prop.deprecated)
+    @Deprecated
+#end
     protected ${prop.fieldType} ${prop.name} = ${prop.fieldInitializer};
 
 #if($prop.name == "details") #############################################TYPE
@@ -557,6 +566,9 @@ implements java.io.Serializable, IObject
 ##  row/field of some model object.
 ##
 
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void set${prop.nameCapped}(${prop.fieldType} map) {
         this.${prop.name} = map;
     }
@@ -567,6 +579,9 @@ implements java.io.Serializable, IObject
         joinColumns = @javax.persistence.JoinColumn(name="${type.tableName()}_id"))
     @javax.persistence.Column(name="${prop.name}", nullable=false)
     @org.hibernate.annotations.ForeignKey(name="FK${type.tableName()}_${prop.name}_map")
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.fieldType} get${prop.nameCapped}() {
         return this.${prop.name};
     }
@@ -584,9 +599,21 @@ implements java.io.Serializable, IObject
     * Filter names which are used by the security system to turn on filters
     * for this particular collection.
     */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public static final String OWNER_FILTER_${prop.nameUpper} = "${ofilter}_${prop.nameUpper}";
+#if($prop.deprecated)
+    @Deprecated
+#end
     public static final String GROUP_FILTER_${prop.nameUpper} = "${gfilter}_${prop.nameUpper}";
+#if($prop.deprecated)
+    @Deprecated
+#end
     public static final String EVENT_FILTER_${prop.nameUpper} = "${efilter}_${prop.nameUpper}";
+#if($prop.deprecated)
+    @Deprecated
+#end
     public static final String PERMS_FILTER_${prop.nameUpper} = "${pfilter}_${prop.nameUpper}";
 #end
 
@@ -758,6 +785,9 @@ implements java.io.Serializable, IObject
         @org.hibernate.annotations.Filter(name=PERMS_FILTER_${prop.nameUpper}, condition=":permsStr = permissions")
     })
 #end
+#if($prop.deprecated)
+    @Deprecated
+#end
     protected ${prop.fieldType} get${prop.nameCapped}() {
         $errorIfUnloaded
         return this.${prop.name};
@@ -766,6 +796,9 @@ implements java.io.Serializable, IObject
     /**
      * setter for ${prop.name} should be avoided. Does not fulfill normal semantics.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     protected void set${prop.nameCapped}(${prop.fieldType} ${prop.name}) {
         $errorIfUnloaded
         this.${prop.name} = ${prop.name};
@@ -788,6 +821,9 @@ implements java.io.Serializable, IObject
     /**
      * returns the size of ${prop.name}. If less than zero, the Set was null.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public int sizeOf${prop.nameCapped}() {
         $errorIfUnloaded
         return this.${prop.name} == null ? -1 : this.${prop.name}.size();
@@ -799,6 +835,9 @@ implements java.io.Serializable, IObject
      * of {@link ome.util.EmptyIterator}. To test for a null collection,
      * see of {@link #sizeOf${prop.nameCapped}()} is less than zero.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public java.util.Iterator<${prop.type}> iterate${prop.nameCapped}() {
         $errorIfUnloaded
         if ( get${prop.nameCapped}() == null ) {
@@ -810,6 +849,9 @@ implements java.io.Serializable, IObject
     /**
      * Returns an unmodifiable collection-view
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public java.util.Collection<${prop.type}> unmodifiable${prop.nameCapped}() {
         $errorIfUnloaded
         if ( get${prop.nameCapped}() == null ) {
@@ -826,6 +868,9 @@ implements java.io.Serializable, IObject
      * even if the underlying collection is null.
      */
     @SuppressWarnings("unchecked")
+#if($prop.deprecated)
+    @Deprecated
+#end
     public <E> java.util.List<E> collect${prop.nameCapped}(ome.util.CBlock<E> block) {
 
         $errorIfUnloaded
@@ -847,6 +892,9 @@ implements java.io.Serializable, IObject
      * use instead of set${prop.nameCapped} . Makes the necessary
      * call on ${prop.type} as well.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void add${prop.fieldName}(${prop.type} target) {
         $errorIfUnloaded
         if (get${prop.nameCapped}() == null) {
@@ -872,6 +920,9 @@ implements java.io.Serializable, IObject
     /**
      * use like add${prop.shortType}.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void add${prop.fieldName}Set(java.util.Collection<${prop.type}> targets) {
         $errorIfUnloaded
         if (get${prop.nameCapped}() == null) {
@@ -900,6 +951,9 @@ implements java.io.Serializable, IObject
     /**
      * removes a single element from this set and makes the inverse call on ${prop.type}
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void remove${prop.fieldName}(${prop.type} target) {
         $errorIfUnloaded
         if (get${prop.nameCapped}() == null) {
@@ -918,6 +972,9 @@ implements java.io.Serializable, IObject
     /**
      * use like remove${prop.shortType}
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void remove${prop.fieldName}Set(java.util.Collection<${prop.type}> targets ) {
         $errorIfUnloaded
         if (get${prop.nameCapped}() == null) {
@@ -945,6 +1002,9 @@ implements java.io.Serializable, IObject
     /**
      * clears the set.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void clear${prop.nameCapped}() {
         $errorIfUnloaded
         if (get${prop.nameCapped}() == null) {
@@ -968,6 +1028,9 @@ implements java.io.Serializable, IObject
     /**
      * Gets the ${prop.type} at the given index.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.type} get${prop.shortType}(int index)
     throws IndexOutOfBoundsException {
         $errorIfUnloaded
@@ -982,6 +1045,9 @@ implements java.io.Serializable, IObject
      * contract. To extend the list, use {@link #add${prop.shortType}(${prop.shortType})}.
      * @see java.util.List\#set(int, Object)
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.type} set${prop.shortType}(int index, ${prop.type} element)
     throws IndexOutOfBoundsException {
         $errorIfUnloaded
@@ -1015,6 +1081,9 @@ implements java.io.Serializable, IObject
      * unloaded. See {@link #sizeOf${prop.nameCapped}()} for more information.
      */
     @javax.persistence.Transient
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.type} getPrimary${prop.shortType}()
     throws IndexOutOfBoundsException {
         $errorIfUnloaded
@@ -1032,6 +1101,9 @@ implements java.io.Serializable, IObject
      * will also throw an {@link ApiUsageException} if the collection is
      * unloaded. See {@link #sizeOf${prop.nameCapped}()} for more information.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.type} setPrimary${prop.shortType}(${prop.type} element)
     throws IndexOutOfBoundsException {
         $errorIfUnloaded
@@ -1067,6 +1139,9 @@ implements java.io.Serializable, IObject
      * Adds a ${LinkType} to ${prop.name} . This entails changing our ${prop.name} Set,
      * creating a new ${LinkType} and calling link${prop.targetName} on the ${prop.target}.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${LinkType} link${prop.targetName} (${prop.target} addition) {
         $errorIfUnloaded
 
@@ -1083,6 +1158,9 @@ implements java.io.Serializable, IObject
      * Adds a ${LinkType} to ${prop.name}, allowing for recursion -- whether
      * or not add${prop.shortType} will be called on the addition <b>if it is loaded</b>
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void add${Link} (${LinkType} link, boolean bothSides) {
         $errorIfUnloaded
         if ( get${prop.nameCapped}() == null ) {
@@ -1103,7 +1181,10 @@ implements java.io.Serializable, IObject
      * while iterating will result in an {@link java.util.ConcurrentModificationException}.
      * Use {@link #linked${prop.targetName}List()} instead.
      */
-     public java.util.Iterator<${prop.target}> linked${prop.targetName}Iterator() {
+#if($prop.deprecated)
+    @Deprecated
+#end
+    public java.util.Iterator<${prop.target}> linked${prop.targetName}Iterator() {
         $errorIfUnloaded
         if ( get${prop.nameCapped}() == null ) {
             return new ome.util.EmptyIterator<${prop.target}>();
@@ -1137,6 +1218,9 @@ implements java.io.Serializable, IObject
     /**
      * find all ${LinkType} which have the argument as their ${other}.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public java.util.Set<${LinkType}> find${Link}( ${prop.target} target ) {
         $errorIfUnloaded
 
@@ -1157,6 +1241,9 @@ implements java.io.Serializable, IObject
      * modifications can be made to the underlying collection without throwing
      * {@link java.util.ConcurrentModificationException}.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public java.util.List<${prop.target}> linked${prop.targetName}List() {
         $errorIfUnloaded
 
@@ -1175,6 +1262,9 @@ implements java.io.Serializable, IObject
      * iterator values themselves are collected.
      */
     @SuppressWarnings("unchecked")
+#if($prop.deprecated)
+    @Deprecated
+#end
     public <E> java.util.List<E> eachLinked${prop.targetName}(ome.util.CBlock<E> block) {
         $errorIfUnloaded
 
@@ -1194,6 +1284,9 @@ implements java.io.Serializable, IObject
     /**
      * unlinks all ${prop.target} instances from this instance.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void unlink${prop.targetName} (${prop.target} removal) {
         $errorIfUnloaded
 
@@ -1208,6 +1301,9 @@ implements java.io.Serializable, IObject
      * removes the given ${Link} from ${prop.name}, allowing for recursion -- whether
      * or not the removal will call unlink${type.shortname} again <b>if loaded</b>.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void remove${Link} (${LinkType} link, boolean bothSides) {
         $errorIfUnloaded
 
@@ -1227,6 +1323,9 @@ implements java.io.Serializable, IObject
     /**
      * clears the set.
      */
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void clear${prop.targetName}Links() {
         $errorIfUnloaded
 
@@ -1237,8 +1336,14 @@ implements java.io.Serializable, IObject
     }
 
 #if(!$prop.actualTarget.global)
+#if($prop.deprecated)
+    @Deprecated
+#end
     private java.util.Map<Long, Long> ${prop.name}CountPerOwner = null;
 
+#if($prop.deprecated)
+    @Deprecated
+#end
     protected void set${prop.nameCapped}CountPerOwner(java.util.Map<Long, Long> map) {
         this.${prop.name}CountPerOwner = map;
     }
@@ -1261,6 +1366,9 @@ implements java.io.Serializable, IObject
     @javax.persistence.Column(name="count", insertable=false, updatable=false, nullable=false)
     @javax.persistence.CollectionTable(name="${type.countName($prop)}",
         joinColumns = @javax.persistence.JoinColumn(name="${type.shortname}_id"))
+#if($prop.deprecated)
+    @Deprecated
+#end
     public java.util.Map<Long, Long> get${prop.nameCapped}CountPerOwner() {
         return this.${prop.name}CountPerOwner;
     }
@@ -1279,11 +1387,17 @@ implements java.io.Serializable, IObject
             @javax.persistence.AttributeOverride(name="unit", column = @javax.persistence.Column(name="${prop.name}Unit") )
     } )
 #end
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.fieldType} get${prop.nameCapped}() {
         $errorIfUnloaded
         return this.${prop.name};
     }
 
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void set${prop.nameCapped}(${prop.fieldType} ${prop.name}) {
         $errorIfUnloaded
 ## See table column type alterations in psql-footer.vm.
@@ -1317,11 +1431,17 @@ implements java.io.Serializable, IObject
 #if($type.isLink)## Need to convert from IObject to an implementation class
     @org.hibernate.annotations.Target(${prop.type}.class)
 #end
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.fieldType} get${prop.nameCapped}() {
         $errorIfUnloaded
         return this.${prop.name};
     }
 
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void set${prop.nameCapped}(${prop.fieldType} ${prop.name}) {
         $errorIfUnloaded
         this.${prop.name} = ${prop.name};
@@ -1358,11 +1478,17 @@ implements java.io.Serializable, IObject
 #end
 
     @javax.persistence.Column(columnDefinition="${prop.def}", nullable=${prop.nullable}, unique=${prop.unique}, name="${type.columnName($prop)}", updatable=${prop.update})
+#if($prop.deprecated)
+    @Deprecated
+#end
     public ${prop.fieldType} get${prop.nameCapped}() {
         $errorIfUnloaded
         return this.${prop.name};
     }
 
+#if($prop.deprecated)
+    @Deprecated
+#end
     public void set${prop.nameCapped}(${prop.fieldType} ${prop.name}) {
         $errorIfUnloaded
 ## See domain definitions in psql-header.vm.
@@ -1471,7 +1597,13 @@ implements java.io.Serializable, IObject
 
 #foreach($prop in $type.classProperties)
 #if($prop.one2Many && $prop.isLink && !$prop.actualTarget.global)
+#if($prop.deprecated)
+    @Deprecated
+#end
     public static final String ${prop.name.toUpperCase()}COUNTPEROWNER = "${type.id}_${prop.name}CountPerOwner";
+#end
+#if($prop.deprecated)
+    @Deprecated
 #end
     public static final String ${prop.nameUpper} = "${type.id}_${prop.name}";
 #end
