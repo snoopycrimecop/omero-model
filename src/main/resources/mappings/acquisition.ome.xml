@@ -56,7 +56,7 @@
 			<!-- Acquisition Context 1 -->
 			<manyone name="image" type="ome.model.core.Image" ordered="true"/>
 			<!-- Warning: relatedTo is DEPRECATED and may be removed in OMERO 6.0. -->
-			<optional name="relatedTo" type="ome.model.core.Pixels"/>
+			<optional name="relatedTo" type="ome.model.core.Pixels" deprecated="true"/>
 			<!-- Note: relatedTo is not used in model-->
 			<required name="pixelsType" type="ome.model.enums.PixelsType"/>
 			<!-- Note: pixelsType is called PixelType in model and uses enum PixelTypes -->
