@@ -35,7 +35,9 @@ dependencies {
     api("ome:formats-gpl:6.1.0-m1")
 
     // Unidata
-    api("edu.ucar:bufr:3.0")
+    api("edu.ucar:bufr:3.0"){
+        exclude group: "edu.ucar", module: "netcdf"
+    }
     api("edu.ucar:udunits:4.5.5")
 }
 
