@@ -10,9 +10,8 @@
 5.5.0-m7 (April 2019)
 ---------------------
 
-- Reduce the number of declaration for Bio-Formats dependencies.
+- Reduce the number of declarations for Bio-Formats dependencies.
 - Convert Unicode in properties file to non-literal.
-- Reduce the number of declaration for Bio-Formats dependencies.
 
 5.5.0-m6 (April 2019)
 ---------------------
