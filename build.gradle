@@ -81,10 +81,6 @@ dsl {
     }
 }
 
-clean {
-    delete dsl.outputDir
-}
-
 processResources {
     with copySpec {
         from 'src/main/resources'
