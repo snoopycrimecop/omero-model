@@ -51,6 +51,8 @@ test {
 dsl {
     database databaseType
 
+    outputDir file("build/${databaseType}")
+
     multiFile {
         java {
             template "object.vm"
@@ -77,10 +79,6 @@ dsl {
             outputFile "resources/enums.properties"
         }
     }
-}
-
-clean {
-    delete dsl.outputDir
 }
 
 processResources {
