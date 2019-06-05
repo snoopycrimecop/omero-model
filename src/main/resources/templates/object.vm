@@ -1462,7 +1462,9 @@ implements java.io.Serializable, IObject
 #elseif($prop.type == "java.lang.Integer" || $prop.type == "java.lang.Long" || $prop.type == "java.lang.Double" || $prop.type == "java.lang.Float")
     @org.hibernate.search.annotations.Fields({
         @org.hibernate.search.annotations.Field(index = org.hibernate.search.annotations.Index.UN_TOKENIZED),
-        @org.hibernate.search.annotations.Field(index = org.hibernate.search.annotations.Index.UN_TOKENIZED,
+        @org.hibernate.search.annotations.Field(index = org.hibernate.search.annotations.Index.TOKENIZED,
+                                                analyzer = @org.hibernate.search.annotations.Analyzer(
+                                                    impl = ome.services.fulltext.ConfiguredAnalyzer.class),
             name="combined_fields")
     })
 #elseif($prop.type == "java.sql.Timestamp")
