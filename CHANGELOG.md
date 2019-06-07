@@ -1,3 +1,8 @@
+5.5.1 (June 2019)
+-----------------
+
+- Adjust combined_fields annotations for search.
+
 5.5.0 (May 2019)
 ----------------
 
