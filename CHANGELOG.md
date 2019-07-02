@@ -1,3 +1,9 @@
+5.5.2 (July 2019)
+-----------------
+
+- Bump to Bio-Formats 6.1.1 (#40)
+- Use offline Hibernate DTD (#41)
+
 5.5.1 (June 2019)
 -----------------
 
