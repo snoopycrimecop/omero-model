@@ -346,12 +346,12 @@ public abstract class Details implements Filterable, Serializable {
     }
 
     public void toString(StringBuilder sb) {
-        sb.append(";perm=");
+        sb.append("perm=");
         sb.append(_perms == null ? null : _perms.toString());
         if (_externalInfo != null) {
             sb.append(";external=" + _externalInfo.getId());
         }
-        sb.append("user=");
+        sb.append(";user=");
         sb.append(_owner == null ? null : _owner.getId());
         sb.append(";group=");
         sb.append(_group == null ? null : _group.getId());
