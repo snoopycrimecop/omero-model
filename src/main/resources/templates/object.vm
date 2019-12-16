@@ -1228,7 +1228,8 @@ implements java.io.Serializable, IObject
         final java.util.Set<${LinkType}> result = new java.util.HashSet<${LinkType}>();
         while ( it.hasNext() ) {
             ${LinkType} link = it.next();
-            if ( link.${other}() == target ) {
+            // null most likely means an ordered set index is missing
+            if ( link != null && link.${other}() == target ) {
                 result.add( link );
             }
         }
