@@ -1,3 +1,9 @@
+5.5.3 (December 2019)
+---------------------
+
+- Bump to Bio-Formats 6.3.1 (#44)
+- Fix NPE issue with nulls in ordered collections (#43)
+
 5.5.2 (July 2019)
 -----------------
 
