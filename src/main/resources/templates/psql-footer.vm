@@ -678,7 +678,7 @@ insert into experimenter (id,permissions,version,omename,firstname,lastname)
         values (ome_nextval('seq_experimenter'),0,0,'guest','Guest','Account');
 insert into node
         (id,permissions,uuid,conn,up,down)
-        select 0,-52,'000000000000000000000000000000000000','clock_timestamp',clock_timestamp(),clock_timestamp();
+        select 0,-52,'000000000000000000000000000000000000','unknown',clock_timestamp(),clock_timestamp();
 insert into session
         (id,permissions,timetoidle,timetolive,started,closed,defaulteventtype,uuid,owner,node)
         select 0,-52,0,0,clock_timestamp(),clock_timestamp(),'BOOTSTRAP',0000, 0,0;
