@@ -1,14 +1,19 @@
+5.5.4 (February 2020)
+---------------------
+
+- Add `omero.pixeldata.max_projection_bytes` to dependency stack ([#134](https://github.com/ome/omero-model/pull/47))
+
 5.5.3 (December 2019)
 ---------------------
 
-- Bump to Bio-Formats 6.3.1 (#44)
-- Fix NPE issue with nulls in ordered collections (#43)
+- Bump to Bio-Formats 6.3.1 ([#44](https://github.com/ome/omero-model/pull/44))
+- Fix NPE issue with nulls in ordered collections ([#43](https://github.com/ome/omero-model/pull/43))
 
 5.5.2 (July 2019)
 -----------------
 
-- Bump to Bio-Formats 6.1.1 (#40)
-- Use offline Hibernate DTD (#41)
+- Bump to Bio-Formats 6.1.1 ([#40](https://github.com/ome/omero-model/pull/40))
+- Use offline Hibernate DTD ([#41](https://github.com/ome/omero-model/pull/41))
 
 5.5.1 (June 2019)
 -----------------
