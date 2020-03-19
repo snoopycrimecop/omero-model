@@ -3,6 +3,9 @@
 
 - Display unit test output instead of caching it
   ([#48](https://github.com/ome/omero-model/pull/48))
+- Security vulnerability fixes for
+  [2019-SV3](https://www.openmicroscopy.org/security/advisories/2019-SV3-user-privacy/) and
+  [2019-SV5](https://www.openmicroscopy.org/security/advisories/2019-SV5-bypass-filters/)
 
 5.5.4 (February 2020)
 ---------------------

@@ -346,6 +346,8 @@ public interface SqlAction {
 
     int insertSession(Map<String, Object> params);
 
+    int updateSessionUserIP(long sessionId, String userIP);
+
     Long sessionId(String uuid);
 
     /**

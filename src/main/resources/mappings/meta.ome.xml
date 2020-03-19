@@ -65,7 +65,7 @@
 			<optional name="message" type="text"/>
 			<required name="defaultEventType" type="string"/>
 			<optional name="userAgent" type="string"/>
-			<optional name="userIP" type="string"/>
+			<optional name="userIP" type="string" deprecated="true"/>
 			<onemany name="events" type="ome.model.meta.Event" inverse="session"/>
 		</properties>
 	</type>

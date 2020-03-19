@@ -148,6 +148,10 @@ public class PostgresSqlAction extends SqlAction.Impl {
         return _namedJdbc().update(_lookup("insert_session"), params); //$NON-NLS-1$
     }
 
+    public int updateSessionUserIP(long sessionId, String userIP) {
+        return _jdbc().update(_lookup("update_session_user_ip"), userIP, sessionId); //$NON-NLS-1$
+    }
+
     public Long sessionId(String uuid) {
         return _jdbc().queryForObject(_lookup("session_id"), Long.class, uuid); //$NON-NLS-1$
     }
