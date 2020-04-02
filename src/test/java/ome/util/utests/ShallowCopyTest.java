@@ -6,14 +6,14 @@
  */
 package ome.util.utests;
 
-import junit.framework.TestCase;
 import ome.model.core.Image;
 import ome.model.core.Pixels;
 import ome.util.ShallowCopy;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class ShallowCopyTest extends TestCase {
+public class ShallowCopyTest {
 
     @Test
     public void testNoNulls() throws Exception {
@@ -23,10 +23,10 @@ public class ShallowCopyTest extends TestCase {
         pix.setImage(new Image());
 
         Pixels test = new ShallowCopy().copy(pix);
-        assertNotNull(test.getId());
-        assertNotNull(test.getDetails());
-        assertNotNull(test.getSizeC());
-        assertNotNull(test.getImage());
+        Assert.assertNotNull(test.getId());
+        Assert.assertNotNull(test.getDetails());
+        Assert.assertNotNull(test.getSizeC());
+        Assert.assertNotNull(test.getImage());
     }
 
 }
