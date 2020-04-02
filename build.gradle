@@ -21,7 +21,6 @@ java {
 }
 
 dependencies {
-    testImplementation("junit:junit:4.12")
     testImplementation("org.testng:testng:6.14.2")
 
     // Needs updating to later versions
