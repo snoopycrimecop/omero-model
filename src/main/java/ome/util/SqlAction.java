@@ -459,6 +459,20 @@ public interface SqlAction {
     String getUsername(long userId);
 
     /**
+     * Load the pretty name for the given user.
+     * @param omeName a user's OME name
+     * @return the user's name for presentation, may be {@code null} if their OME name does not exist
+     */
+    String getUserPrettyNameByOmeName(String omeName);
+
+    /**
+     * Load the email address for the given user.
+     * @param omeName a user's OME name
+     * @return the user's email address, may be {@code null} if they have none or their OME name does not exist
+     */
+    String getUserEmailByOmeName(String omeName);
+
+    /**
      * Load all the non-empty email addresses for users in a given group.
      * @param groupId
      * @return a non-null {@link Collection} of non-empty user email addresses.
@@ -993,6 +1007,30 @@ public interface SqlAction {
                 id = null; // This means there's not one.
             }
             return id;
+        }
+
+        @Override
+        public String getUserPrettyNameByOmeName(String userName) {
+            String prettyName = null;
+            try {
+                prettyName = _jdbc().queryForObject(_lookup("user_pretty_name"),
+                        String.class, userName);
+            } catch (EmptyResultDataAccessException e) {
+                /* none found */
+            }
+            return prettyName;
+        }
+
+        @Override
+        public String getUserEmailByOmeName(String userName) {
+            String email = null;
+            try {
+                email = _jdbc().queryForObject(_lookup("user_email"),
+                        String.class, userName);
+            } catch (EmptyResultDataAccessException e) {
+                /* none found */
+            }
+            return email;
         }
 
         public Collection<String> getUserEmailsByGroup(long groupId) {
