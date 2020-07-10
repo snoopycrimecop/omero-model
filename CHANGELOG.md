@@ -1,3 +1,9 @@
+5.6.1 (July 2020)
+-----------------
+
+- Bump to Bio-Formats 6.5.1 ([#53](https://github.com/ome/omero-model/pull/53))
+- Remove junit dependency ([#52](https://github.com/ome/omero-model/pull/52))
+
 5.6.0 (April 2020)
 ------------------
 
