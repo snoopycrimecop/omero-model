@@ -1,3 +1,8 @@
+5.6.0 (April 2020)
+------------------
+
+- Provide SQL means of fetching users' pretty name and e-mail ([#51](https://github.com/ome/omero-model/pull/51))
+
 5.5.5 (March 2020)
 ------------------
 
