@@ -1,3 +1,8 @@
+5.6.2 (September 2020)
+----------------------
+
+- New properties to configure JDBC ([#60](https://github.com/ome/omero-model/pull/60))
+
 5.6.1 (July 2020)
 -----------------
 
