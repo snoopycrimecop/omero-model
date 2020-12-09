@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ome/omero-model.png)](https://travis-ci.org/ome/omero-model)
+[![Actions Status](https://github.com/ome/omero-model/workflows/Gradle/badge.svg)](https://github.com/ome/omero-model/actions)
 
 # omero-model
 
