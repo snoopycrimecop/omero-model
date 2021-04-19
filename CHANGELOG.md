@@ -3,6 +3,7 @@
 
 - Add support for Gradle 6 ([#66](https://github.com/ome/omero-model/pull/66))
 - Use mavenCentral ([#67](https://github.com/ome/omero-model/pull/67))
+- Link to external documentation about quartz-scheduler CronExpression.html ([#67](https://github.com/ome/omero-model/pull/64))
 
 
 5.6.2 (September 2020)
