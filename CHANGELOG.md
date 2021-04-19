@@ -1,3 +1,10 @@
+5.6.3 (April 2021)
+------------------
+
+- Add support for Gradle 6 ([#66](https://github.com/ome/omero-model/pull/66))
+- Use mavenCentral ([#67](https://github.com/ome/omero-model/pull/67))
+
+
 5.6.2 (September 2020)
 ----------------------
 
