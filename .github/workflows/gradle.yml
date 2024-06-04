@@ -9,7 +9,29 @@ on:
 
 jobs:
   build:
-    uses: ome/action-workflows/.github/workflows/gradle_build.yml@v2
+    strategy:
+      matrix:
+        java: [8, 11]
+        distribution: ['temurin', 'zulu']
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      gradle_version: 6.8.3 # use ``current`` to install the current stable release
+      gradle_commands: build # default is build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: ${{ matrix.distribution }}
+          cache: 'gradle'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: ${{ env.gradle_version }}
+      - name: Run commands
+        run: gradle ${{ env.gradle_commands }}
   publish_snapshots:
     if: ${{ github.ref == 'refs/heads/master' && github.repository_owner == 'ome' }}
     needs: build
