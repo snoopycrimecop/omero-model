@@ -31,7 +31,7 @@ dependencies {
     api("org.hibernate:hibernate-search:3.4.2.Final")
 
     // Our libraries
-    api("ome:formats-gpl:7.3.0")
+    api("ome:formats-gpl:8.0.0-SNAPSHOT")
 
     // Unidata
     api("edu.ucar:bufr:3.0"){
