@@ -28,7 +28,13 @@ repositories {
 }
 
 compileJava {
-    options.release = 8
+    options.release = 11
+}
+
+configurations.all {
+    attributes {
+        attribute(Attribute.of("org.gradle.jvm.environment", String), "standard-jvm")
+    }
 }
 
 dependencies {
@@ -45,9 +51,10 @@ dependencies {
         exclude group: "dom4j", module: "dom4j"
     }
     api("org.dom4j:dom4j:2.1.4")
+    api("com.google.guava:guava:33.6.0-jre")
 
     // Our libraries
-    api("ome:formats-gpl:8.5.0")
+    api("org.openmicroscopy:formats-gpl:9.0.0-rc5")
 
 }
 
