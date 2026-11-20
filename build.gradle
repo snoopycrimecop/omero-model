@@ -54,7 +54,7 @@ dependencies {
     api("com.google.guava:guava:33.6.0-jre")
 
     // Our libraries
-    api("org.openmicroscopy:formats-gpl:9.0.0-rc5")
+    api("org.openmicroscopy:formats-gpl:8.5.0")
 
 }
 
