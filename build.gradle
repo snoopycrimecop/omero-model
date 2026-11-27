@@ -47,7 +47,7 @@ dependencies {
     api("org.dom4j:dom4j:2.1.4")
 
     // Our libraries
-    api("ome:formats-gpl:8.5.0")
+    api("org.openmicroscopy:formats-gpl:9.0.0-SNAPSHOT")
 
 }
 
